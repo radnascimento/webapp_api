@@ -11,6 +11,8 @@ This project is a REST API created using **.NET Core 8**. It is designed to prov
 - **DTOs (Data Transfer Objects)**: The project uses **DTOs** to decouple the API models from the internal data models. This helps ensure efficient data transfer and enhances security by controlling the exposed data.
 - **Extensions**: The project includes **extensions** in the **Helpers** folder to simplify common tasks and provide reusable code snippets across the application.
 - **Filters**: **Filters** are used to make entry parameters more dynamic. They allow for greater flexibility and customization of API inputs, making the filtering of query parameters and other request data easier and more adaptable.
+- **Microsoft Identity**: The API uses **Microsoft Identity** to manage user information, including authentication and authorization. This enables secure management of user accounts and access control.
+- **JWT Authentication**: The API uses **JSON Web Tokens (JWT)** to manage authentication. JWTs are used to securely transmit user information between the client and server, ensuring that only authorized users can access protected resources.
 
 ### Folder Structure:
 - **Config**: Contains configuration files and settings for the application.
@@ -31,7 +33,3 @@ This project is a REST API created using **.NET Core 8**. It is designed to prov
 - **Controller-Action Pattern**: The API follows the **Controller-Action** pattern, where controllers handle the routing and actions perform the necessary logic for each endpoint.
 - **Scoped Services**: The project registers services with the **Scoped** lifetime (`AddScoped`), meaning that a new instance of the service is created per request. This is suitable for services that are shared during the processing of a single request but should not be reused across multiple requests.
 - **Dependency Injection**: The project uses **Dependency Injection (DI)** to inject dependencies into controllers and services, promoting loose coupling and easier testability.
-
----
-
-Let me know if this version is good to go or if you need any more changes!
