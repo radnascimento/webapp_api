@@ -1,14 +1,11 @@
-﻿
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-
 
 namespace Api.Models.Dtos
 {
-    public class StudyDto
+    public class EditStudyDto
     {
-        [JsonIgnore]
-        [BindNever]
+        
         public int IdStudy { get; set; }
         public int IdTopic { get; set; }
         public string Note { get; set; }

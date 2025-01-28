@@ -7,9 +7,9 @@ namespace Api.Repository
 {
     public class StudyRepository : IStudyRepository
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public StudyRepository(AppDbContext context)
+        public StudyRepository(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -29,7 +29,7 @@ namespace Api.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Study>> GetStudiesAsync(int? idStudy = null, int? idTopic = null, string note = null, DateTime? operationDate = null, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<Study>> GetStudiesAsync(int? idStudy = null, int? idTopic = null, string note = null, DateTime? operationDate = null, int page = 1, int pageSize = 10, string idUser = null)
         {
             IQueryable<Study> query = _context.Studies
                 .Include(s => s.Topic) // Include Topic data
@@ -55,6 +55,12 @@ namespace Api.Repository
             {
                 query = query.Where(s => s.OperationDate.Date == operationDate.Value.Date);
             }
+
+            if (!string.IsNullOrEmpty(idUser))
+            {
+                query = query.Where(s => s.IdUser.Contains(idUser));
+            }
+            
 
             // Apply pagination
             query = query.Skip((page - 1) * pageSize).Take(pageSize);

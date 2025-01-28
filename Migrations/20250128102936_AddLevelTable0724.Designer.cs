@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250115132900_AddLevelTable1027")]
-    partial class AddLevelTable1027
+    [Migration("20250128102936_AddLevelTable0724")]
+    partial class AddLevelTable0724
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,6 +76,10 @@ namespace Api.Migrations
                     b.Property<int>("IdTopic")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("IdUser")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -86,6 +90,8 @@ namespace Api.Migrations
                     b.HasKey("IdStudy");
 
                     b.HasIndex("IdTopic");
+
+                    b.HasIndex("IdUser");
 
                     b.ToTable("Studies");
                 });
@@ -170,6 +176,11 @@ namespace Api.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -220,6 +231,10 @@ namespace Api.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator().HasValue("IdentityUser");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -301,6 +316,17 @@ namespace Api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Api.Models.User", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasDiscriminator().HasValue("User");
+                });
+
             modelBuilder.Entity("Api.Models.Material", b =>
                 {
                     b.HasOne("Api.Models.Level", "Level")
@@ -328,7 +354,15 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Api.Models.User", "User")
+                        .WithMany("Studies")
+                        .HasForeignKey("IdUser")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Topic");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -391,6 +425,11 @@ namespace Api.Migrations
                 {
                     b.Navigation("Materials");
 
+                    b.Navigation("Studies");
+                });
+
+            modelBuilder.Entity("Api.Models.User", b =>
+                {
                     b.Navigation("Studies");
                 });
 #pragma warning restore 612, 618

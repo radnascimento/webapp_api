@@ -7,9 +7,9 @@ namespace Api.Repository
 {
     public class MaterialRepository : IMaterialRepository
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public MaterialRepository(AppDbContext context)
+        public MaterialRepository(ApplicationDbContext context)
         {
             _context = context;
         }

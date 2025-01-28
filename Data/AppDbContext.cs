@@ -5,66 +5,90 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Data
 {
-    public class AppDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+       : base(options) { }
         public DbSet<Topic> Topics { get; set; }
         public DbSet<Level> Levels { get; set; }
         public DbSet<Material> Materials { get; set; }
         public DbSet<Study> Studies { get; set; } // Add the DbSet for Study
+        
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<IdentityUserLogin<string>>()
-            .HasKey(u => new { u.LoginProvider, u.ProviderKey }); // IdentityUserLogin requires composite key
-
-
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Material>()
-               .HasKey(m => m.IdMaterial);
+            // Configure IdentityUserLogin composite key
+            modelBuilder.Entity<IdentityUserLogin<string>>()
+                .HasKey(u => new { u.LoginProvider, u.ProviderKey });
 
-            // Material - Topic (One-to-Many)
+            // Material configuration
+            modelBuilder.Entity<Material>()
+                .HasKey(m => m.IdMaterial);
+
             modelBuilder.Entity<Material>()
                 .HasOne(m => m.Topic)
                 .WithMany(t => t.Materials)
                 .HasForeignKey(m => m.IdTopic)
-                .OnDelete(DeleteBehavior.Cascade); // Cascades deletion of materials when a topic is deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Material>()
-            .Property(s => s.IdMaterial)
-            .ValueGeneratedOnAdd();
+                .Property(s => s.IdMaterial)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Material>()
-              .HasOne(m => m.Level)
-              .WithMany(l => l.Materials)
-              .HasForeignKey(m => m.IdLevel)
-              .OnDelete(DeleteBehavior.Restrict);
-
+                .HasOne(m => m.Level)
+                .WithMany(l => l.Materials)
+                .HasForeignKey(m => m.IdLevel)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Material>()
-            .Property(m => m.OperationDate)
-            .IsRequired(true);
+                .Property(m => m.OperationDate)
+                .IsRequired(true);
 
+            // Study configuration
+            modelBuilder.Entity<Study>()
+                .HasKey(s => s.IdStudy);
 
             modelBuilder.Entity<Study>()
-               .HasKey(s => s.IdStudy);
+                .Property(s => s.IdStudy)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Study>()
-            .Property(s => s.IdStudy)
-            .ValueGeneratedOnAdd();
+                .HasOne(s => s.Topic)
+                .WithMany(t => t.Studies)
+                .HasForeignKey(s => s.IdTopic)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Study>()
-               .HasOne(s => s.Topic) // Study has one Topic
-               .WithMany(t => t.Studies) // Topic has many Studies
-               .HasForeignKey(s => s.IdTopic)
-               .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(s => s.User)
+                .WithMany(u => u.Studies)
+                .HasForeignKey(s => s.IdUser)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Study>()
-              .Property(m => m.OperationDate)
-              .IsRequired(true);
+                .Property(m => m.OperationDate)
+                .IsRequired(true);
 
+
+            modelBuilder.Entity<Topic>()
+            .HasKey(s => s.Id);
+
+            modelBuilder.Entity<Topic>()
+                .Property(s => s.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Topic>()
+         .Property(m => m.OperationDate)
+         .IsRequired(true);
+
+            modelBuilder.Entity<Topic>()
+          .HasOne(s => s.User)
+          .WithMany(u => u.Topics)
+          .HasForeignKey(s => s.IdUser)
+          .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

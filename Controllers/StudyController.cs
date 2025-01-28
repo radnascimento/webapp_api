@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
 using Api.Helpers.Extensions;
 using Api.Models;
 using Api.Models.Dtos;
@@ -34,12 +35,7 @@ namespace Api.Controllers
             return Ok(study);
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Study>>> GetAllStudiesAsync()
-        //{
-        //    var studies = await _studyService.GetAllStudiesAsync();
-        //    return Ok(studies);
-        //}
+    
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Study>>> GetAllStudiesAsync([FromQuery] StudyFilter filter)
@@ -51,11 +47,12 @@ namespace Api.Controllers
             var operationDate = filter.OperationDate;
             var page = filter.Page;
             var pageSize = filter.PageSize;
+            var IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             try
             {
                 // Call the service to get studies based on the query parameters
-                var studies = await _studyService.GetStudiesAsync(idStudy, idTopic, note, operationDate ,page, pageSize);
+                var studies = await _studyService.GetStudiesAsync(idStudy, idTopic, note, operationDate, page, pageSize, IdUser);
 
                 if (studies == null || !studies.Any())
                 {
@@ -73,26 +70,70 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateStudyAsync(StudyDto study)
         {
+            study.IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             await _studyService.AddStudyAsync(study.ToStudy());
 
             return Ok(study);
-
-
-            //return CreatedAtAction(nameof(GetStudyByIdAsync), new { id = study.IdStudy }, study);
-
-
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateStudyAsync(int id, Study study)
+
+
+        //public async Task<ActionResult> UpdateStudyAsync(int id, int idTopic, string note, string operationDate)
+        public async Task<ActionResult> UpdateStudyAsync(int id, EditStudyDto study)
         {
-            if (id != study.IdStudy)
+            // Validate the ID
+            if (id == 0)
             {
-                return BadRequest();
+                return BadRequest("Invalid ID. ID must be greater than 0.");
             }
 
-            await _studyService.UpdateStudyAsync(study);
-            return NoContent();
+            // Validate the study DTO
+            if (study == null)
+            {
+                return BadRequest("Study data is required.");
+            }
+
+            // Validate specific fields in the study DTO
+            if (string.IsNullOrWhiteSpace(study.Note))
+            {
+                return BadRequest("Note is required.");
+            }
+
+            if (study.IdTopic <= 0)
+            {
+                return BadRequest("Invalid Topic ID. Topic ID must be greater than 0.");
+            }
+
+            if (study.OperationDate == default)
+            {
+                return BadRequest("Operation Date is required.");
+            }
+
+            // Assign the current user ID to the study
+            study.IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Validate the user ID
+            if (string.IsNullOrWhiteSpace(study.IdUser))
+            {
+                return BadRequest("User ID is missing or invalid.");
+            }
+
+            try
+            {
+                // Call the service to update the study
+                await _studyService.UpdateStudyAsync(study.ToStudy());
+
+                return Ok(new { message = "Study updated successfully.", study });
+
+
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if needed) and return a fail response
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]

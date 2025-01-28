@@ -1,4 +1,5 @@
-﻿using Api.Helpers.Extensions;
+﻿using System.Security.Claims;
+using Api.Helpers.Extensions;
 using Api.Models;
 using Api.Models.Dtos;
 using Api.Repository.Interface;
@@ -24,7 +25,9 @@ namespace Api.Controllers
         public async Task<ActionResult<IEnumerable<Topic>>> GetAllTopics()
         {
             var topics = await _service.GetAllTopicsAsync();
-            return Ok(topics);
+
+            var IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Ok(topics.Where(p=> p.IdUser == IdUser));
         }
 
         [HttpGet("{id}")]
@@ -38,7 +41,10 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult> AddTopic([FromBody] TopicDto topic)
         {
+            topic.IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             await _service.AddTopicAsync(topic.ToTopic());
+
             return CreatedAtAction(nameof(GetTopicById), new { id = topic.Id }, topic);
         }
 

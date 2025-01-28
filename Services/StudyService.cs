@@ -21,9 +21,9 @@ namespace Api.Services
         {
             return await _studyRepository.GetAllStudiesAsync();
         }
-        public async Task<IEnumerable<Study>> GetStudiesAsync(int? idStudy = null, int? idTopic = null, string note = null, DateTime? operationDate = null, int page = 1, int pageSize = 10)
+        public async Task<IEnumerable<Study>> GetStudiesAsync(int? idStudy = null, int? idTopic = null, string note = null, DateTime? operationDate = null, int page = 1, int pageSize = 10, string idUser = null)
         {
-            return await _studyRepository.GetStudiesAsync(idStudy, idTopic, note, operationDate, page, pageSize);
+            return await _studyRepository.GetStudiesAsync(idStudy, idTopic, note, operationDate, page, pageSize, idUser);
         }
 
 

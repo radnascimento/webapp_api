@@ -12,12 +12,12 @@ namespace Api.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public AuthenticationController(UserManager<IdentityUser> userManager,
-                                         SignInManager<IdentityUser> signInManager,
+        public AuthenticationController(UserManager<ApplicationUser> userManager,
+                                         SignInManager<ApplicationUser> signInManager,
                                          IConfiguration configuration)
         {
             _userManager = userManager;
@@ -31,7 +31,7 @@ namespace Api.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new IdentityUser { UserName = model.UserName, Email = model.Email };
+                var user = new ApplicationUser { UserName = model.UserName, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
@@ -55,10 +55,12 @@ namespace Api.Controllers
                 // Create the claims for the JWT token
                 var claims = new[]
                 {
+
                 new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id), // Add the user's ID
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-                
+
                 // Retrieve secret key from appsettings.json
                 var secretKey = _configuration["Jwt:Secret"];
                 var key = new SymmetricSecurityKey(Convert.FromBase64String(secretKey));

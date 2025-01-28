@@ -7,9 +7,9 @@ namespace Api.Repository
 {
     public class LevelRepository : ILevelRepository
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public LevelRepository(AppDbContext context)
+        public LevelRepository(ApplicationDbContext context)
         {
             _context = context;
         }

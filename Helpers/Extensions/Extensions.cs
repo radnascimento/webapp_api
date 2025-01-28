@@ -33,20 +33,37 @@ namespace Api.Helpers.Extensions
             {
                 Id = dto.Id,
                 Description = dto.Description,
-                Name = dto.Name
+                Name = dto.Name,
+                IdUser = dto.IdUser,
+                OperationDate = dto.OperationDate,
             };
         }
 
 
         public static Study ToStudy(this StudyDto dto)
         {
+
             return new Study
             {
                 IdStudy = dto.IdStudy,
                 IdTopic = dto.IdTopic,
                 Note = dto.Note,
-                OperationDate = dto.OperationDate
+                OperationDate = dto.OperationDate,
+                IdUser = dto.IdUser
+            };
+        }
 
+
+        public static Study ToStudy(this EditStudyDto dto)
+        {
+
+            return new Study
+            {
+                IdStudy = dto.IdStudy,
+                IdTopic = dto.IdTopic,
+                Note = dto.Note,
+                OperationDate = dto.OperationDate,
+                IdUser = dto.IdUser
             };
         }
     }

@@ -7,8 +7,8 @@ namespace Api.Repository
 {
     public class TopicRepository: ITopicRepository
     {
-        private readonly AppDbContext _context;
-        public TopicRepository(AppDbContext context)
+        private readonly ApplicationDbContext _context;
+        public TopicRepository(ApplicationDbContext context)
         {
             _context = context;
         }
