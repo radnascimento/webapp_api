@@ -1,4 +1,5 @@
-﻿using Api.Models;
+﻿using Api.Enums;
+using Api.Models;
 using Api.Models.Dtos;
 
 namespace Api.Helpers.Extensions
@@ -42,14 +43,14 @@ namespace Api.Helpers.Extensions
 
         public static Study ToStudy(this StudyDto dto)
         {
-
             return new Study
             {
                 IdStudy = dto.IdStudy,
                 IdTopic = dto.IdTopic,
                 Note = dto.Note,
                 OperationDate = dto.OperationDate,
-                IdUser = dto.IdUser
+                IdUser = dto.IdUser,
+                IdStudyPC = (int)StudyEnum.Registered
             };
         }
 
@@ -63,7 +64,17 @@ namespace Api.Helpers.Extensions
                 IdTopic = dto.IdTopic,
                 Note = dto.Note,
                 OperationDate = dto.OperationDate,
-                IdUser = dto.IdUser
+                IdUser = dto.IdUser,
+                IdStudyPC = dto.IdStudyPC
+            };
+        }
+        public static ApplicationConfig ToApplicationConfig(this ApplicationConfigDto dto)
+        {
+            return new ApplicationConfig
+            {
+                IdApplicationConfig = dto.IdApplicationConfig,
+                Name = dto.Name,
+                JsonContent = dto.JsonContent
             };
         }
     }

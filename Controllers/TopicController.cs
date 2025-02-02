@@ -24,11 +24,23 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Topic>>> GetAllTopics()
         {
-            var topics = await _service.GetAllTopicsAsync();
+            try
+            {
+                var topics = await _service.GetAllTopicsAsync();
 
-            var IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Ok(topics.Where(p=> p.IdUser == IdUser));
+                var IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                return Ok(topics.Where(p=> p.IdUser == IdUser));
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error: {ex.Message}"); // Or use ILogger for structured logging
+                return StatusCode(500, new { message = "An unexpected error occurred while retrieving topics." });
+            }
         }
+
+      
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Topic>> GetTopicById(int id)

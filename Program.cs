@@ -8,10 +8,14 @@ using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.ResponseCompression;
 using Api.Models;
+using Microsoft.AspNetCore.Diagnostics;
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMemoryCache();
+
 
 builder.Services.AddResponseCompression(options =>
 {
@@ -47,7 +51,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-   
+
 
 
     // Add support for JWT Bearer authorization
@@ -78,8 +82,15 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Load the appsettings.json file and configure the DbContext
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))); // Use configuration for connection string
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))); // Use configuration for connection string
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .LogTo(Console.WriteLine, LogLevel.Information));
+
+
 
 // Add Identity services
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -123,6 +134,29 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        var error = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        if (error != null)
+        {
+            var errorResponse = new
+            {
+                Message = "An unexpected error occurred.",
+                Details = error.Message + "  - " +  error.InnerException // Include in development only
+            };
+
+            await context.Response.WriteAsJsonAsync(errorResponse);
+        }
+    });
+});
+
+
 
 app.UseHttpsRedirection();
 app.UseRouting();

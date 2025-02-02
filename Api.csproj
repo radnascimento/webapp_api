@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <None Update="Data\app.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

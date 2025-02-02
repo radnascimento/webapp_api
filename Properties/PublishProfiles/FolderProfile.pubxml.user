@@ -5,7 +5,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Users\PC\Desktop\Coding\React\api.v1\Api\bin\Release\net8.0\publish\</_PublishTargetUrl>
-    <History>True|2025-01-28T12:30:30.0118499Z||;True|2025-01-13T13:14:05.7873537-03:00||;</History>
+    <History>True|2025-01-30T17:41:30.3204686Z||;True|2025-01-29T07:15:28.4932085-03:00||;True|2025-01-28T15:50:34.3312535-03:00||;True|2025-01-28T15:47:18.4598515-03:00||;True|2025-01-28T15:42:45.4361998-03:00||;True|2025-01-28T15:42:05.9032718-03:00||;True|2025-01-28T15:28:42.0163558-03:00||;True|2025-01-28T15:28:20.7695250-03:00||;True|2025-01-28T09:30:30.0118499-03:00||;True|2025-01-13T13:14:05.7873537-03:00||;</History>
     <LastFailureDetails />
   </PropertyGroup>
 </Project>

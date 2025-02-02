@@ -5,9 +5,11 @@ using Api.Models;
 using Api.Models.Dtos;
 using Api.Models.Filters;
 using Api.Repository.Interface;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -35,7 +37,7 @@ namespace Api.Controllers
             return Ok(study);
         }
 
-    
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Study>>> GetAllStudiesAsync([FromQuery] StudyFilter filter)
@@ -70,11 +72,23 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateStudyAsync(StudyDto study)
         {
-            study.IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            await _studyService.AddStudyAsync(study.ToStudy());
 
-            return Ok(study);
+
+            try
+            {
+                study.IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                await _studyService.AddStudyAsync(study.ToStudy());
+
+                return Ok(study);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+
+
         }
 
         [HttpPut("{id}")]
@@ -122,18 +136,29 @@ namespace Api.Controllers
 
             try
             {
-                // Call the service to update the study
+               
+
+                if (study.IdStudyPC == 0)
+                {
+                    var data = await _studyService.GetStudyByIdAsync(study.IdStudy);
+                    if (data == null)
+                    {
+                        return NotFound(new { message = "Study not found." });
+                    }
+
+                    study.IdStudyPC = data.IdStudyPC;
+                }
+
                 await _studyService.UpdateStudyAsync(study.ToStudy());
 
                 return Ok(new { message = "Study updated successfully.", study });
-
-
             }
             catch (Exception ex)
             {
-                // Log the exception (if needed) and return a fail response
-                return StatusCode(500, $"An error occurred: {ex.Message}");
+                Console.WriteLine($"Error updating study: {ex.Message}"); // Replace with a logging system
+                return StatusCode(500, new { message = "An internal server error occurred." });
             }
+
         }
 
         [HttpDelete("{id}")]

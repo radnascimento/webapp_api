@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Api.Models.Dtos;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Controllers
 {
@@ -13,16 +15,16 @@ namespace Api.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IConfiguration _configuration;
+                private readonly IConfiguration _configuration;
+        private readonly IMemoryCache _memoryCache;
 
         public AuthenticationController(UserManager<ApplicationUser> userManager,
                                          SignInManager<ApplicationUser> signInManager,
-                                         IConfiguration configuration)
+                                         IConfiguration configuration, IMemoryCache memoryCache)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _configuration = configuration;
+            _memoryCache = memoryCache;
         }
 
         // POST api/authentication/register
@@ -45,6 +47,62 @@ namespace Api.Controllers
             return BadRequest("Invalid data.");
         }
 
+
+
+
+        // PUT api/authentication/update
+        
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            var user = await _userManager.FindByNameAsync(model.UserName);
+
+            if (user == null)
+            {
+                return NotFound(new { Message = "User not found" });
+            }
+
+            // Verify if the provided current password is correct
+            var passwordCheck = await _userManager.CheckPasswordAsync(user, model.CurrentPassword);
+            if (!passwordCheck)
+            {
+                return BadRequest(new { Message = "Current password is incorrect." });
+            }
+
+            // Update email if provided
+            if (!string.IsNullOrEmpty(model.Email))
+            {
+                user.Email = model.Email;
+                var emailResult = await _userManager.UpdateAsync(user);
+                if (!emailResult.Succeeded)
+                {
+                    return BadRequest(emailResult.Errors);
+                }
+            }
+
+            // Update password if provided
+            if (!string.IsNullOrEmpty(model.NewPassword))
+            {
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await _userManager.ResetPasswordAsync(user, resetToken, model.NewPassword);
+                if (!passwordResult.Succeeded)
+                {
+                    return BadRequest(passwordResult.Errors);
+                }
+            }
+
+            return Ok(new { Message = "User updated successfully" });
+        }
+
+
+
+
+
         // POST api/authentication/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -58,7 +116,8 @@ namespace Api.Controllers
 
                 new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.NameIdentifier, user.Id), // Add the user's ID
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
                 // Retrieve secret key from appsettings.json
@@ -75,6 +134,13 @@ namespace Api.Controllers
                     expires: DateTime.Now.AddDays(int.Parse(_configuration["Jwt:ExpiryDays"])),
                     signingCredentials: creds
                 );
+
+
+                // Generate a 6-digit number with each digit randomized
+                var random = new Random();
+                var randomNumber = string.Concat(Enumerable.Range(0, 6).Select(_ => random.Next(0, 10).ToString()));
+                
+                _memoryCache.Set(user.Id, randomNumber, TimeSpan.FromMinutes(5));
 
                 return Ok(new
                 {

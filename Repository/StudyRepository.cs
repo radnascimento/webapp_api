@@ -16,14 +16,15 @@ namespace Api.Repository
 
         public async Task<Study> GetStudyByIdAsync(int id)
         {
-            return await _context.Studies
-                .Include(s => s.Topic) // Include Topic data
+            return await _context.Study
+                .AsNoTracking()
+                .Include(s => s.Topic) 
                 .FirstOrDefaultAsync(s => s.IdStudy == id);
         }
 
         public async Task<IEnumerable<Study>> GetAllStudiesAsync()
         {
-            return await _context.Studies
+            return await _context.Study
                 .Include(s => s.Topic) // Include Topic data
                 .OrderByDescending(s => s.IdStudy)
                 .ToListAsync();
@@ -31,8 +32,9 @@ namespace Api.Repository
 
         public async Task<IEnumerable<Study>> GetStudiesAsync(int? idStudy = null, int? idTopic = null, string note = null, DateTime? operationDate = null, int page = 1, int pageSize = 10, string idUser = null)
         {
-            IQueryable<Study> query = _context.Studies
-                .Include(s => s.Topic) // Include Topic data
+            IQueryable<Study> query = _context.Study
+                .Include(s => s.Topic)
+                .Include(s => s.StudyPC)
                 .OrderByDescending(s => s.IdStudy);
 
             // Apply filtering based on the provided parameters
@@ -72,7 +74,7 @@ namespace Api.Repository
 
         public async Task<IEnumerable<Study>> GetStudiesByTopicIdAsync(int topicId)
         {
-            return await _context.Studies
+            return await _context.Study
                 .Where(s => s.IdTopic == topicId)
                 .Include(s => s.Topic) // Include Topic data
                 .ToListAsync();
@@ -80,22 +82,22 @@ namespace Api.Repository
 
         public async Task AddStudyAsync(Study study)
         {
-            await _context.Studies.AddAsync(study);
+            await _context.Study.AddAsync(study);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateStudyAsync(Study study)
         {
-            _context.Studies.Update(study);
+            _context.Study.Update(study);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteStudyAsync(int id)
         {
-            var study = await _context.Studies.FindAsync(id);
+            var study = await _context.Study.FindAsync(id);
             if (study != null)
             {
-                _context.Studies.Remove(study);
+                _context.Study.Remove(study);
                 await _context.SaveChangesAsync();
             }
         }

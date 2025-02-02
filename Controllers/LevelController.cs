@@ -25,8 +25,16 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Level>>> GetAllLevels()
         {
-            var levels = await _service.GetAllLevelsAsync();
-            return Ok(levels);
+            try
+            {
+                var levels = await _service.GetAllLevelsAsync();
+                return Ok(levels);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]

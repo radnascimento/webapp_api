@@ -17,6 +17,28 @@ namespace Api.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
+            modelBuilder.Entity("Api.Models.ApplicationConfig", b =>
+                {
+                    b.Property<int>("IdApplicationConfig")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("JsonContent")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("OperationDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("IdApplicationConfig");
+
+                    b.ToTable("ApplicationConfig");
+                });
+
             modelBuilder.Entity("Api.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -134,6 +156,9 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("IdStudyPC")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("IdTopic")
                         .HasColumnType("INTEGER");
 
@@ -150,11 +175,52 @@ namespace Api.Migrations
 
                     b.HasKey("IdStudy");
 
+                    b.HasIndex("IdStudyPC");
+
                     b.HasIndex("IdTopic");
 
                     b.HasIndex("IdUser");
 
-                    b.ToTable("Studies");
+                    b.ToTable("Study");
+                });
+
+            modelBuilder.Entity("Api.Models.StudyPC", b =>
+                {
+                    b.Property<int>("IdStudyPC")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("IdStudyPC");
+
+                    b.ToTable("StudyPC");
+                });
+
+            modelBuilder.Entity("Api.Models.StudyReview", b =>
+                {
+                    b.Property<int>("IdStudyReview")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("IdStudy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("IdStudyPC")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("OperationDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("IdStudyReview");
+
+                    b.HasIndex("IdStudy");
+
+                    b.HasIndex("IdStudyPC");
+
+                    b.ToTable("StudyReview");
                 });
 
             modelBuilder.Entity("Api.Models.Topic", b =>
@@ -334,6 +400,12 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Models.Study", b =>
                 {
+                    b.HasOne("Api.Models.StudyPC", "StudyPC")
+                        .WithMany("Studies")
+                        .HasForeignKey("IdStudyPC")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Api.Models.Topic", "Topic")
                         .WithMany("Studies")
                         .HasForeignKey("IdTopic")
@@ -346,9 +418,30 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("StudyPC");
+
                     b.Navigation("Topic");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Api.Models.StudyReview", b =>
+                {
+                    b.HasOne("Api.Models.Study", "Study")
+                        .WithMany("StudyReviews")
+                        .HasForeignKey("IdStudy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Api.Models.StudyPC", "StudyPC")
+                        .WithMany("StudyReviews")
+                        .HasForeignKey("IdStudyPC")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Study");
+
+                    b.Navigation("StudyPC");
                 });
 
             modelBuilder.Entity("Api.Models.Topic", b =>
@@ -423,6 +516,18 @@ namespace Api.Migrations
             modelBuilder.Entity("Api.Models.Level", b =>
                 {
                     b.Navigation("Materials");
+                });
+
+            modelBuilder.Entity("Api.Models.Study", b =>
+                {
+                    b.Navigation("StudyReviews");
+                });
+
+            modelBuilder.Entity("Api.Models.StudyPC", b =>
+                {
+                    b.Navigation("Studies");
+
+                    b.Navigation("StudyReviews");
                 });
 
             modelBuilder.Entity("Api.Models.Topic", b =>
