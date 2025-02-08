@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.ResponseCompression;
 using Api.Models;
 using Microsoft.AspNetCore.Diagnostics;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 
 
@@ -43,7 +44,15 @@ builder.Services.AddControllers()
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.SignIn.RequireConfirmedEmail = true; // User must confirm email before login
+});
 
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(3); // Extend token expiration if needed
+});
 
 // Add Swagger/OpenAPI for API documentation
 builder.Services.AddEndpointsApiExplorer();
@@ -148,7 +157,7 @@ app.UseExceptionHandler(errorApp =>
             var errorResponse = new
             {
                 Message = "An unexpected error occurred.",
-                Details = error.Message + "  - " +  error.InnerException // Include in development only
+                Details = error.Message + "  - " + error.InnerException // Include in development only
             };
 
             await context.Response.WriteAsJsonAsync(errorResponse);

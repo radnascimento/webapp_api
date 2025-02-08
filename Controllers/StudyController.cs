@@ -1,4 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System.IO.Compression;
+using System.Security.Claims;
+using System.Text.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Api.Helpers.Extensions;
 using Api.Models;
@@ -69,6 +72,51 @@ namespace Api.Controllers
             }
         }
 
+
+        /// <summary>
+        /// 📌 Compressed JSON response using GZip
+        /// </summary>
+        [HttpGet("compressed")]
+        public async Task<IActionResult> GetCompressedStudiesAsync([FromQuery] StudyFilter filter)
+        {
+            try
+            {
+                var idUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var studies = await _studyService.GetStudiesAsync(filter.IdStudy, filter.IdTopic, filter.Note, filter.OperationDate, filter.Page, filter.PageSize, idUser);
+
+                if (studies == null || !studies.Any())
+                {
+                    return NotFound("No studies found with the specified filters.");
+                }
+
+                // Convert data to JSON
+                //string json = JsonSerializer.Serialize(studies);
+
+                string json = JsonSerializer.Serialize(studies, new JsonSerializerOptions
+                {
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+                    WriteIndented = false
+                });
+
+                byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+                // Compress data using GZip
+                using var compressedStream = new MemoryStream();
+                using (var gzipStream = new GZipStream(compressedStream, CompressionMode.Compress, true))
+                {
+                    gzipStream.Write(jsonBytes, 0, jsonBytes.Length);
+                }
+
+                compressedStream.Seek(0, SeekOrigin.Begin);
+
+                return File(compressedStream.ToArray(), "application/gzip", "studies.json.gz");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult> CreateStudyAsync(StudyDto study)
         {
@@ -90,6 +138,48 @@ namespace Api.Controllers
 
 
         }
+
+
+
+        /// <summary>
+        /// 📌 Receives a GZip-compressed JSON request
+        /// </summary>
+        [HttpPost("compressed")]
+        public async Task<ActionResult> CreateCompressedStudyAsync()
+        {
+            try
+            {
+                // Read and decompress GZip request
+                using var decompressedStream = new MemoryStream();
+                using (var gzipStream = new GZipStream(Request.Body, CompressionMode.Decompress))
+                {
+                    await gzipStream.CopyToAsync(decompressedStream);
+                }
+
+                decompressedStream.Seek(0, SeekOrigin.Begin);
+                using var reader = new StreamReader(decompressedStream, Encoding.UTF8);
+                string json = await reader.ReadToEndAsync();
+
+                // Deserialize JSON to object
+                var study = JsonSerializer.Deserialize<StudyDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (study == null)
+                {
+                    return BadRequest("Invalid study data.");
+                }
+
+                study.IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                await _studyService.AddStudyAsync(study.ToStudy());
+
+                return Ok(study);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
 
         [HttpPut("{id}")]
 

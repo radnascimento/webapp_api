@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Api.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\..\\spaced-study\\spaced-study.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

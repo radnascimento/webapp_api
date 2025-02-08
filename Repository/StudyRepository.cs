@@ -2,6 +2,7 @@
 using Api.Models;
 using Api.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Api.Repository
 {
@@ -35,6 +36,7 @@ namespace Api.Repository
             IQueryable<Study> query = _context.Study
                 .Include(s => s.Topic)
                 .Include(s => s.StudyPC)
+                .Include (s => s.StudyReviews)
                 .OrderByDescending(s => s.IdStudy);
 
             // Apply filtering based on the provided parameters
@@ -67,8 +69,43 @@ namespace Api.Repository
             // Apply pagination
             query = query.Skip((page - 1) * pageSize).Take(pageSize);
 
+            var lst = await query.ToListAsync();
+
+
+            foreach (Study item in lst)
+            {
+                try
+                {
+                    // Validate the Note property
+                    if (!string.IsNullOrEmpty(item.Note) && item.Note.Length > 20)
+                    {
+                        // Truncate the note to 20 characters and append "..."
+                        item.Note = item.Note.Substring(0, 300) + "{seemoreinformation}";
+                    }
+                    else if (!string.IsNullOrEmpty(item.Note))
+                    {
+                        // If the note is shorter than 20 characters, keep it as is
+                        item.Note = item.Note;
+                    }
+                    else
+                    {
+                        // If the note is null or empty, set a default value
+                        item.Note = "No note available.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception instead of rethrowing it
+                    // You can use a logging framework like Serilog, NLog, or the built-in ILogger
+                    //Console.WriteLine($"An error occurred while processing Study ID {item.Id}: {ex.Message}");
+                    // Optionally, you can continue processing the next item
+                    continue;
+                }
+            }
+
+
             // Execute the query and return the results
-            return await query.ToListAsync();
+            return lst;
         }
 
 

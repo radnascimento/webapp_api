@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Welcome to Spaced Study</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #347960;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Welcome to Spaced Study, {UserName}!</h1>
+        </div>
+        <div class='content'>
+            <p>Dear {UserName},</p>
+            <p>Thank you for joining Spaced Study! We are thrilled to have you on board. You are now part of an innovative learning platform that helps you make the most out of your study time with personalized, spaced repetition techniques.</p>
+            <p>We encourage you to explore our platform, where you can:</p>
+            <ul>
+                <li>Track your progress and improve your study habits.</li>
+                <li>Access personalized learning materials tailored to your needs.</li>
+                <li>Stay motivated with regular challenges and rewards.</li>
+            </ul>
+            <p>Our team is here to support you every step of the way. If you have any questions or need assistance, feel free to reach out to us at any time.</p>
+            <p>We look forward to seeing you succeed in your learning journey!</p>
+            <br />
+            {confirmationLink}
+
+
+        </div>
+        <div class='footer'>
+            <p>Best regards,<br>The Spaced Study Team</p>
+            <p>If you did not sign up for this service, please disregard this email.</p>
+        </div>
+    </div>
+</body>
+</html>

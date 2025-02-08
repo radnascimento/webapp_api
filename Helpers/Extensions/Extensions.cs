@@ -40,6 +40,18 @@ namespace Api.Helpers.Extensions
             };
         }
 
+        public static Topic ToTopic(this EditTopicDto dto)
+        {
+            return new Topic
+            {
+                Id = dto.Id,
+                Description = dto.Description,
+                Name = dto.Name,
+                IdUser = dto.IdUser,
+                OperationDate = dto.OperationDate,
+            };
+        }
+
 
         public static Study ToStudy(this StudyDto dto)
         {
@@ -54,6 +66,18 @@ namespace Api.Helpers.Extensions
             };
         }
 
+
+
+        public static StudyReview ToStudy(this EditStudyReviewDto dto)
+        {
+            return new StudyReview
+            {
+                IdStudyReview = dto.IdStudyReview,
+                IdStudy = dto.IdStudy,
+                OperationDate = dto.OperationDate,
+                IdStudyPC = dto.IdStudyPC,
+            };
+        }
 
         public static Study ToStudy(this EditStudyDto dto)
         {

@@ -3,6 +3,7 @@ using Api.Helpers.Extensions;
 using Api.Models;
 using Api.Models.Dtos;
 using Api.Repository.Interface;
+using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,11 +62,39 @@ namespace Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateTopic(int id, [FromBody] Topic topic)
+        public async Task<ActionResult> UpdateTopic(int id, [FromBody] EditTopicDto topic)
         {
             if (id != topic.Id) return BadRequest();
-            await _service.UpdateTopicAsync(topic);
-            return NoContent();
+
+
+            //if (topic.Id != 0)
+            //{
+            //    var data = await _service.GetTopicByIdAsync(topic.Id);
+                
+            //    if (data == null)
+            //    {
+            //        return NotFound(new { message = "Study not found." });
+            //    }
+
+                
+            //}
+
+            topic.IdUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+            try
+            {
+                await _service.UpdateTopicAsync(topic.ToTopic());
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return Ok(new { message = "Topic updated successfully.", topic });
+
+
         }
 
         [HttpDelete("{id}")]

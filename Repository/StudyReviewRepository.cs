@@ -1,4 +1,5 @@
 ﻿using Api.Data;
+using Api.Enums;
 using Api.Models;
 using Api.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -27,12 +28,14 @@ public class StudyReviewRepository : IStudyReviewRepository
         try
         {
             var studyReviews = await _context.StudyReview
-                .Include(sr => sr.Study)
-                .Include(sr => sr.StudyPC)
-                .Include(sr => sr.Study.Topic)
-                .GroupBy(sr => sr.IdStudy)
-                .Select(g => g.OrderBy(sr => sr.IdStudyReview).FirstOrDefault())
-                .ToListAsync();
+             .Include(sr => sr.Study)
+             .Include(sr => sr.StudyPC)
+             .Include(sr => sr.Study.Topic)
+             .Where(sr => sr.IdStudyPC == (int)StudyEnum.Registered) // Apply filter first
+             .GroupBy(sr => sr.IdStudy)
+             .Select(g => g.OrderBy(sr => sr.OperationDate).FirstOrDefault()) // Select record with min OperationDate
+             .ToListAsync();
+
 
             return studyReviews.OrderByDescending(s => s.IdStudyReview);
         }
@@ -103,8 +106,16 @@ public class StudyReviewRepository : IStudyReviewRepository
 
     public async Task UpdateStudyReviewAsync(StudyReview studyReview)
     {
-        _context.StudyReview.Update(studyReview);
-        await _context.SaveChangesAsync();
+        try
+        {
+            _context.StudyReview.Update(studyReview);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 
     public async Task DeleteStudyReviewAsync(int id)
