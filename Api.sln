@@ -5,8 +5,8 @@ VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api.csproj", "{DEBA58DB-7207-483D-8758-D30351B86CE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "spaced-study", "..\..\spaced-study\spaced-study.csproj", "{140328ED-1BAC-429C-84DB-52A8B73135B2}"
-EndProject
+//Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "spaced-study", "..\..\spaced-study\spaced-study.csproj", "{140328ED-1BAC-429C-84DB-52A8B73135B2}"
+//EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
